@@ -2,12 +2,16 @@ name: Run Lady Popular Bot
 
 on:
   schedule:
-    - cron: '0 */2 * * *'  # every 2 hours
-  workflow_dispatch:       # allow manual runs
+    # Every 1.5 hours (2 cron expressions needed)
+    - cron: '0 */3 * * *'    # 00:00, 03:00, 06:00, ...
+    - cron: '30 1-23/3 * * *'  # 01:30, 04:30, 07:30, ...
+
+  workflow_dispatch:  # allow manual runs
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
+    timeout-minutes: 10  # ⏱️ Cancel the job if it runs longer than 10 minutes
 
     steps:
       - name: Checkout code
@@ -31,7 +35,7 @@ jobs:
         run: node burn-energy.js
 
       - name: Upload screenshots
-        if: always()  # Always upload, even on failure
+        if: always()  # Always run this step even if previous steps failed
         uses: actions/upload-artifact@v4
         with:
           name: error-screenshots
