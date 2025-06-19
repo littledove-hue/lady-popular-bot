@@ -22,6 +22,7 @@ const { chromium } = require('playwright');
 
         console.log("🔎 Waiting for Sign In button...");
         await page.waitForSelector('#login-btn', { timeout: 30000 });
+        await page.waitForTimeout(5000);  // ⏱️ wait before click
         await page.click('#login-btn');
         console.log("✅ Sign In button clicked.");
 
@@ -36,6 +37,7 @@ const { chromium } = require('playwright');
         );
         console.log("✅ Password entered.");
 
+        await page.waitForTimeout(5000);  // ⏱️ wait before submitting
         await page.click('#loginSubmit');
         console.log("📨 Credentials submitted.");
 
@@ -73,6 +75,7 @@ const { chromium } = require('playwright');
       for (const selector of cookieSelectors) {
         try {
           const button = await page.waitForSelector(selector, { timeout: 3000 });
+          await page.waitForTimeout(5000);  // ⏱️ wait before clicking cookie
           await button.click();
           console.log(`🍪 Cookie accepted using selector: ${selector}`);
           await page.waitForTimeout(3000);
@@ -98,7 +101,6 @@ const { chromium } = require('playwright');
       await browser.close();
       return;
     }
-
     // ----------------------------------------
     // 🟧 Step 4: Fashion Arena (with 3 refreshes to dismiss popups)
     let arenaEnergy = 1;
@@ -240,9 +242,7 @@ const { chromium } = require('playwright');
     }
 
     // ----------------------------------------
-    console.log("🎉 All tasks completed. Closing browser.");
-
-  } catch (err) {
+ } catch (err) {
     console.error("💥 Script crashed:", err);
     await page.screenshot({ path: 'error.png', fullPage: true });
     console.log("📸 Screenshot saved as 'error.png' for debugging.");
