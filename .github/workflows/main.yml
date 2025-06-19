@@ -2,27 +2,30 @@ name: Run Lady Popular Bot
 
 on:
   schedule:
-    - cron: '0 */2 * * *'  # Every 2 hours
-  workflow_dispatch:       # Allow manual runs too
+    - cron: '0 */2 * * *'  # every 2 hours
+  workflow_dispatch:       # allow manual runs
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
 
     steps:
-      - name: ⬇️ Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: ⚙️ Setup Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: 20
 
-      - name: 📦 Install dependencies
+      - name: Install dependencies
         run: npm install
 
-      - name: 🤖 Run Lady Popular bot
-        run: node burn-energy.js
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Run burn-energy.js
         env:
           LP_EMAIL: ${{ secrets.LP_EMAIL }}
           LP_PASSWORD: ${{ secrets.LP_PASSWORD }}
+        run: node burn-energy.js
