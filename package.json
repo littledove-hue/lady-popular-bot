@@ -1,0 +1,12 @@
+{
+  "name": "lady-popular-bot",
+  "version": "1.0.0",
+  "description": "Automates duels and beauty pageant in Lady Popular using Playwright",
+  "main": "burn-energy.js",
+  "scripts": {
+    "start": "node burn-energy.js"
+  },
+  "dependencies": {
+    "playwright": "^1.44.0"
+  }
+}
