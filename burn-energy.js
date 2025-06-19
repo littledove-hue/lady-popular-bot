@@ -246,9 +246,10 @@ while (lastEnergy > 1) {
     });
     await page.waitForTimeout(5000);
 
-    const judgeBox = await page.waitForSelector('text=Judge', { timeout: 10000 });
-    await judgeBox.click();
+    await page.waitForSelector('#judgeButton', { timeout: 10000 });
+    await page.click('#judgeButton');
     console.log("🖱️ Judge clicked.");
+
 
     for (let i = 0; i < 3; i++) {
       await page.mouse.click(voteCoordinate.x, voteCoordinate.y);
