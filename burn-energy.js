@@ -28,18 +28,33 @@ try {
   await page.waitForTimeout(10000);
 
 // -----------------------------------------------------------------------------------------
-// 🍪 Accept cookies and refresh the page thrice
-console.log("🍪 Clicking 'Accept All'...");
-await page.waitForSelector('#accept-all-btn', { timeout: 15000 });
-await page.click('#accept-all-btn');
-await page.waitForTimeout(10000);
+// 🍪 Accept cookies (mandatory popup)
+console.log("🍪 Waiting for 'Accept All' cookie button...");
 
-// 🔁 Refresh page 3 times to clear any leftover issues
-for (let i = 1; i <= 3; i++) {
-  console.log(`🔁 Refreshing page (${i}/3)...`);
-  await page.reload({ waitUntil: 'domcontentloaded' });
-  await page.waitForTimeout(5000);
+let cookieAccepted = false;
+for (let attempt = 1; attempt <= 10; attempt++) {
+  try {
+    const cookieButton = await page.$('#accept-all-btn');
+    if (cookieButton) {
+      await cookieButton.click();
+      console.log("✅ 'Accept All' clicked.");
+      cookieAccepted = true;
+      break;
+    } else {
+      console.log(`⏳ Attempt ${attempt}: Button not found, retrying...`);
+      await page.waitForTimeout(2000);
+    }
+  } catch (e) {
+    console.log(`⚠️ Error during attempt ${attempt}: ${e.message}`);
+    await page.waitForTimeout(2000);
+  }
 }
+
+if (!cookieAccepted) {
+  throw new Error("❌ Failed to find and click 'Accept All' cookie button after multiple attempts.");
+}
+
+await page.waitForTimeout(5000);
 
 // ----------------------------------------------------------------------------------------------
 // fashion arena
