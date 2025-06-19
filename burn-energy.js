@@ -28,33 +28,33 @@ try {
   await page.waitForTimeout(10000);
 
 // -----------------------------------------------------------------------------------------
-// 🍪 Accept cookies (mandatory popup)
-console.log("🍪 Waiting for 'Accept All' cookie button...");
+console.log("🍪 Looking for cookie consent button...");
 
 let cookieAccepted = false;
-for (let attempt = 1; attempt <= 10; attempt++) {
+const cookieSelectors = [
+  '#accept-all-btn',
+  'button:has-text("Accept All")',
+  'button:has-text("Accept")',
+  'button:has-text("Confirm")',
+  'button:has-text("Agree")',
+];
+
+for (const selector of cookieSelectors) {
   try {
-    const cookieButton = await page.$('#accept-all-btn');
-    if (cookieButton) {
-      await cookieButton.click();
-      console.log("✅ 'Accept All' clicked.");
-      cookieAccepted = true;
-      break;
-    } else {
-      console.log(`⏳ Attempt ${attempt}: Button not found, retrying...`);
-      await page.waitForTimeout(2000);
-    }
-  } catch (e) {
-    console.log(`⚠️ Error during attempt ${attempt}: ${e.message}`);
-    await page.waitForTimeout(2000);
+    const button = await page.waitForSelector(selector, { timeout: 3000 });
+    await button.click();
+    cookieAccepted = true;
+    console.log(`🍪 Cookie accepted using selector: ${selector}`);
+    await page.waitForTimeout(5000);
+    break;
+  } catch {
+    console.log(`🔍 Cookie button not found with selector: ${selector}`);
   }
 }
 
 if (!cookieAccepted) {
-  throw new Error("❌ Failed to find and click 'Accept All' cookie button after multiple attempts.");
+  console.log("⚠️ Could not find any cookie consent button, continuing anyway.");
 }
-
-await page.waitForTimeout(5000);
 
 // ----------------------------------------------------------------------------------------------
 // fashion arena
