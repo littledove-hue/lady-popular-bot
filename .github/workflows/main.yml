@@ -30,18 +30,10 @@ jobs:
           LP_PASSWORD: ${{ secrets.LP_PASSWORD }}
         run: node burn-energy.js
 
-    - name: Upload error screenshot (if exists)
-      if: always()  # runs this step even if the script crashes
-      uses: actions/upload-artifact@v3
-      with:
-        name: error-screenshots
-        path: error.png
-        if-no-files-found: ignore
-
-    - name: Upload all screenshots
-      if: always()
-      uses: actions/upload-artifact@v3
-      with:
-        name: error-screenshots
-        path: "*.png"
-        if-no-files-found: ignore
+      - name: Upload screenshots
+        if: always()  # always run, even if script failed
+        uses: actions/upload-artifact@v3
+        with:
+          name: error-screenshots
+          path: "*.png"
+          if-no-files-found: ignore
