@@ -59,9 +59,7 @@ const { chromium } = require('playwright');
     }
 
     // ----------------------------------------
-    // 🍪 Cookie Consent
-    console.log("🍪 Looking for cookie consent button...");
-    let cookieAccepted = false;
+    // 🍪 Step 3: Cookie Consent (with retry)
     const cookieSelectors = [
       '#accept-all-btn',
       'button:has-text("Accept All")',
@@ -70,23 +68,36 @@ const { chromium } = require('playwright');
       'button:has-text("Agree")'
     ];
 
-    for (const selector of cookieSelectors) {
-      try {
-        const button = await page.waitForSelector(selector, { timeout: 3000 });
-        await button.click();
-        cookieAccepted = true;
-        console.log(`🍪 Cookie accepted using selector: ${selector}`);
-        await page.waitForTimeout(5000);
-        break;
-      } catch {
-        console.log(`🔍 Cookie button not found with selector: ${selector}`);
+    async function attemptCookieConsent() {
+      console.log("🍪 Looking for cookie consent button...");
+      for (const selector of cookieSelectors) {
+        try {
+          const button = await page.waitForSelector(selector, { timeout: 3000 });
+          await button.click();
+          console.log(`🍪 Cookie accepted using selector: ${selector}`);
+          await page.waitForTimeout(3000);
+          return true;
+        } catch {
+          console.log(`🔍 Cookie button not found with selector: ${selector}`);
+        }
       }
+      return false;
+    }
+
+    let cookieAccepted = await attemptCookieConsent();
+    if (!cookieAccepted) {
+      console.log("🔁 Cookie button not found. Refreshing and retrying...");
+      await page.reload({ waitUntil: 'domcontentloaded', timeout: 60000 });
+      await page.waitForTimeout(5000);
+      cookieAccepted = await attemptCookieConsent();
     }
 
     if (!cookieAccepted) {
-      console.log("⚠️ Could not find any cookie consent button, continuing anyway.");
+      console.log("❌ Failed to accept cookie even after retry. Aborting.");
+      await page.screenshot({ path: 'cookie-error.png', fullPage: true });
+      await browser.close();
+      return;
     }
-
     // ----------------------------------------
     // 🟧 Fashion Arena
     let arenaEnergy = 1;
