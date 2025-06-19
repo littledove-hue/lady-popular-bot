@@ -98,15 +98,22 @@ const { chromium } = require('playwright');
       await browser.close();
       return;
     }
+
     // ----------------------------------------
-    // 🟧 Fashion Arena
+    // 🟧 Step 4: Fashion Arena (with 3 refreshes to dismiss popups)
     let arenaEnergy = 1;
 
     while (arenaEnergy > 0) {
       try {
         console.log("🟧 Navigating to Fashion Arena...");
         await page.goto('https://v3.g.ladypopular.com/duels.php', { timeout: 60000 });
-        await page.waitForTimeout(5000);
+
+        // Quick 3 refreshes to dismiss possible popups
+        for (let i = 1; i <= 3; i++) {
+          console.log(`🔄 Refreshing Fashion Arena page (${i}/3)...`);
+          await page.reload({ timeout: 30000 });
+          await page.waitForTimeout(1500); // Short delay between refreshes
+        }
 
         const energyText = await page.innerText(
           '#header > div.wrapper > div > div.player-panel-middle > div.player-panel-energy > a.player-energy.player-arena-energy > span.player-energy-value > span'
