@@ -8,24 +8,54 @@ const { chromium } = require('playwright');
   const password = process.env.LP_PASSWORD;
 
 // ----------------------------------------------------------------------------------------
-// logging in and entering credentials
-try {
-  console.log("🔐 Opening Lady Popular login page...");
-  try {
-    await page.goto('https://ladypopular.com', { waitUntil: 'domcontentloaded', timeout: 60000 });
-  } catch (error) {
-    console.log("⚠️ Page load timed out. Refreshing and retrying...");
-    await page.reload({ waitUntil: 'domcontentloaded' });
+let loginAttempts = 0;
+const maxLoginAttempts = 2;
+
+async function performLogin() {
+  while (loginAttempts < maxLoginAttempts) {
+    try {
+      console.log(`🔐 Opening Lady Popular login page... Attempt ${loginAttempts + 1}`);
+      await page.goto('https://ladypopular.com', { waitUntil: 'domcontentloaded', timeout: 60000 });
+
+      console.log("🔍 Waiting for Sign In button...");
+      await page.waitForSelector('#login-btn', { timeout: 60000 });
+      await page.click('#login-btn');
+      console.log("✅ Sign In button clicked.");
+
+      console.log("✍️ Entering credentials...");
+      await page.waitForSelector('#login-username-field', { timeout: 10000 });
+      await page.fill('#login-username-field', email);
+      console.log("✅ Username filled.");
+
+      await page.waitForSelector('#loginForm3 > div > label:nth-child(2) > input[type=password]', { timeout: 10000 });
+      await page.fill('#loginForm3 > div > label:nth-child(2) > input[type=password]', password);
+      console.log("✅ Password filled.");
+
+      await page.waitForSelector('#loginSubmit', { timeout: 10000 });
+      await page.click('#loginSubmit');
+      console.log("🚀 Login credentials submitted.");
+
+      return true; // Success
+    } catch (error) {
+      loginAttempts++;
+      console.log(`⚠️ Login attempt ${loginAttempts} failed: ${error.message}`);
+
+      if (loginAttempts < maxLoginAttempts) {
+        console.log("🔁 Refreshing and retrying login from Step 1...");
+        await page.reload({ waitUntil: 'domcontentloaded' });
+      } else {
+        console.log("❌ Login failed after 2 attempts. Aborting...");
+        await page.screenshot({ path: 'login-error.png', fullPage: true });
+        console.log("📸 Screenshot saved as 'login-error.png'");
+        await browser.close();
+        process.exit(1);
+      }
+    }
   }
+}
 
-  await page.click('#login-btn');
-  await page.waitForTimeout(10000);
+await performLogin();
 
-  console.log("🔐 Entering credentials...");
-  await page.fill('#login-username-field', email);
-  await page.fill('#loginForm3 > div > label:nth-child(2) > input[type=password]', password);
-  await page.click('#loginSubmit');
-  await page.waitForTimeout(10000);
 
 // -----------------------------------------------------------------------------------------
 console.log("🍪 Looking for cookie consent button...");
