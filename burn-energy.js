@@ -74,11 +74,11 @@ const { chromium } = require('playwright');
       console.log("🍪 Looking for cookie consent button...");
       for (const selector of cookieSelectors) {
         try {
-          const button = await page.waitForSelector(selector, { timeout: 3000 });
-          await page.waitForTimeout(5000);  // ⏱️ wait before clicking cookie
+          const button = await page.waitForSelector(selector, { timeout: 10000 });
+          await page.waitForTimeout(15000);  // ⏱️ wait before clicking cookie
           await button.click();
           console.log(`🍪 Cookie accepted using selector: ${selector}`);
-          await page.waitForTimeout(3000);
+          await page.waitForTimeout(10000);
           return true;
         } catch {
           console.log(`🔍 Cookie button not found with selector: ${selector}`);
